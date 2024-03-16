@@ -1,0 +1,50 @@
+server {
+    client_header_timeout 3m;
+    client_body_timeout 3m;
+    send_timeout 3m;
+    server_name eatwet.com www.eatwet.com;
+
+    location / {
+#       client_max_body_size 20M;
+#       client_body_temp_path /var/www/html/temp;
+
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+       # proxy_set_header X-Real-IP $remote_addr;
+       # proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       # proxy_set_header X-Forwarded-Proto $scheme;
+       # proxy_set_header X-Real-IP $remote_addr;
+
+        proxy_request_buffering on;
+        proxy_buffer_size 128k;
+        proxy_buffers 4 256k;
+        proxy_busy_buffers_size 256k;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/eatwet.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/eatwet.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+server {
+    if ($host = www.eatwet.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = eatwet.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name eatwet.com www.eatwet.com;
+    return 404; # managed by Certbot
+
+
+
+
+}
